@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: vision-ai
+    runtime: docker
+    plan: free
+    envVars:
+      - key: VLM_PROVIDER
+        value: groq          # falls back to "mock" automatically if no key is set
+      - key: GROQ_API_KEY
+        sync: false          # set this in the Render dashboard (Secret)
+      - key: MAX_FRAMES_PER_JOB
+        value: "25"

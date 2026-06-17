@@ -1,0 +1,22 @@
+# ── Core (required) ───────────────────────────────────────────────────────────
+opencv-python-headless>=4.9.0  # cv2 without GUI libs — required on headless servers
+pydantic>=2.6.0                # config validation and type safety
+pyyaml>=6.0.1                  # YAML config parsing
+numpy>=1.26.0                  # ndarray frames
+requests>=2.31.0               # Groq / HuggingFace adapter HTTP
+
+# ── API + UI server ───────────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9        # file uploads
+
+# ── Dev ───────────────────────────────────────────────────────────────────────
+pytest>=8.0.0
+
+# ── VLM providers (install the ONE you use; Groq needs no extra lib) ──────────
+# google-generativeai>=0.5   # --vlm gemini   (token-rich free tier; pip install to use)
+# openai>=1.30.0             # --vlm openai    (paid)
+# anthropic>=0.25.0          # --vlm anthropic (paid)
+
+# ── Identity-bound path only (Stage 3a face recognition) ──────────────────────
+deepface>=0.0.92           # face recognition; only for identity use cases

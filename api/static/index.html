@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vision AI — Behaviour Validation</title>
+<style>
+  :root{
+    --bg:#0c0f15; --panel:#141923; --panel-2:#1b212e; --border:#252c3a;
+    --text:#e7ecf3; --muted:#8b97ab; --accent:#5b8cff; --accent-2:#7a6bff;
+    --ok:#34d399; --warn:#fbbf24; --crit:#f87171; --chip:#222a3a;
+    --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#15203a 0%,var(--bg) 55%);
+    color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap}
+  .brand h1{font-size:22px;margin:0;letter-spacing:.2px}
+  .brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+  .logo{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));font-weight:800;margin-right:12px}
+  .brand-row{display:flex;align-items:center}
+  .badge{font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--border);
+    padding:6px 11px;border-radius:999px;white-space:nowrap}
+  .badge b{color:var(--text)}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow)}
+  .controls{display:grid;grid-template-columns:1fr;gap:16px}
+  .drop{border:1.5px dashed #33405a;border-radius:12px;padding:26px;text-align:center;cursor:pointer;
+    transition:.15s;background:var(--panel-2)}
+  .drop:hover,.drop.drag{border-color:var(--accent);background:#1b2436}
+  .drop b{color:var(--text)} .drop small{color:var(--muted);display:block;margin-top:5px}
+  .drop.has-file{border-style:solid;border-color:var(--accent)}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .field{flex:1;min-width:170px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+  select,input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+    border-radius:10px;padding:10px 12px;font:inherit}
+  .btns{display:flex;gap:12px;flex-wrap:wrap}
+  button{border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer;transition:.15s}
+  .primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff}
+  .primary:disabled{opacity:.5;cursor:not-allowed}
+  .ghost{background:var(--panel-2);color:var(--text);border:1px solid var(--border)}
+  .ghost:hover{border-color:var(--accent)}
+  .progress{height:8px;background:var(--panel-2);border-radius:999px;overflow:hidden;margin-top:6px}
+  .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    transition:width .4s}
+  .status-row{display:flex;align-items:center;justify-content:space-between;margin-top:18px;gap:12px}
+  .status-row .muted{color:var(--muted);font-size:13px}
+  .section-title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+    margin:30px 0 12px}
+  .verdict{border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;gap:16px;
+    border:1px solid var(--border)}
+  .verdict .pill{font-weight:800;font-size:15px;padding:7px 14px;border-radius:999px}
+  .verdict.ok{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.35)}
+  .verdict.ok .pill{background:var(--ok);color:#06281d}
+  .verdict.bad{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.35)}
+  .verdict.bad .pill{background:var(--crit);color:#350f0f}
+  .verdict .meta{color:var(--muted);font-size:13px}
+  .triggers{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+  .chip{background:var(--chip);border:1px solid var(--border);color:var(--text);font-size:12px;
+    padding:3px 9px;border-radius:999px}
+  .alerts{display:flex;flex-direction:column;gap:10px}
+  .alert{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--border);
+    border-left-width:3px;border-radius:10px;padding:12px 14px}
+  .alert.warning{border-left-color:var(--warn)} .alert.critical{border-left-color:var(--crit)}
+  .alert.info{border-left-color:var(--accent)}
+  .alert .t{font-weight:700;font-size:13px} .alert .m{color:var(--muted);font-size:13px;margin-top:2px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .frame{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .frame img{width:100%;height:150px;object-fit:cover;display:block;background:#0a0d12}
+  .frame .body{padding:11px 12px}
+  .frame .fi{font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+  .frame .bh{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .frame .bh .chip{background:#1f2c45;border-color:#2c3c5c}
+  .frame .none{color:var(--muted);font-size:12px;font-style:italic}
+  .frame .rz{font-size:12.5px;color:#c3ccda;margin-top:4px}
+  .hidden{display:none}
+  .warn-banner{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.4);
+    color:#f5d98a;border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.5}
+  .warn-banner code{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:5px;font-size:12px}
+  .warn-banner b{color:#fde9b8}
+  .spinner{width:15px;height:15px;border:2px solid var(--border);border-top-color:var(--accent);
+    border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:-2px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand-row">
+      <span class="logo">AI</span>
+      <div class="brand">
+        <h1>Vision AI — Behaviour Validation</h1>
+        <p>Upload a short clip. The system reads behaviour with a VLM and validates it against configurable rules.</p>
+      </div>
+    </div>
+    <span class="badge" id="provider-pill">provider: <b>…</b></span>
+  </header>
+
+  <div class="card">
+    <div class="controls">
+      <div class="drop" id="drop">
+        <b>Drop a video here, or click to choose</b>
+        <small id="dropHint">.mp4 / .mov / .avi / .mkv / .webm — short clips work best</small>
+        <input type="file" id="file" accept="video/*" class="hidden" />
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Use case</label>
+          <select id="useCase"></select>
+        </div>
+        <div class="field">
+          <label>VLM provider</label>
+          <select id="provider"></select>
+        </div>
+        <div class="field">
+          <label>Sample interval (seconds)</label>
+          <input type="number" id="interval" value="10" min="1" step="1" />
+        </div>
+      </div>
+
+      <div class="warn-banner hidden" id="mockBanner">
+        ⚠ <b>Mock mode is active</b> — behaviour labels are <b>simulated</b>, not
+        read from the video by a real VLM. Set an API key (e.g. <code>GROQ_API_KEY</code>)
+        on the server to enable real analysis. See <code>docs/DEPLOYMENT.md</code>.
+      </div>
+
+      <div class="btns">
+        <button class="primary" id="analyzeBtn" disabled>Analyze video</button>
+        <button class="ghost" id="demoBtn">Try the demo clip</button>
+      </div>
+    </div>
+
+    <div class="status-row hidden" id="statusRow">
+      <span class="muted" id="statusText"><span class="spinner"></span> Starting…</span>
+      <span class="muted" id="countText"></span>
+    </div>
+    <div class="progress hidden" id="progressWrap"><i id="progressBar"></i></div>
+  </div>
+
+  <div id="verdictWrap" class="hidden">
+    <div class="section-title">Verdict</div>
+    <div class="verdict" id="verdict"></div>
+  </div>
+
+  <div id="alertsWrap" class="hidden">
+    <div class="section-title">Alerts</div>
+    <div class="alerts" id="alerts"></div>
+  </div>
+
+  <div id="framesWrap" class="hidden">
+    <div class="section-title">Frames</div>
+    <div class="grid" id="frames"></div>
+  </div>
+
+  <footer>One VLM call per sampled frame · results stream in live · a per-job frame cap protects the shared API quota.</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let selectedFile = null, polling = null, seen = new Set();
+
+async function loadHealth(){
+  try{
+    const h = await (await fetch('/api/health')).json();
+    const opts = (h.providers||[]).map(p=>{
+      const label = p.id + (p.id==='mock' ? ' (simulated)' : (p.ready ? '' : ' — no key set'));
+      return `<option value="${p.id}" ${p.ready?'':'disabled'}>${label}</option>`;
+    }).join('');
+    $('provider').innerHTML = opts;
+    $('provider').value = h.provider;          // effective default after key check
+    updateMockBanner();
+  }catch(e){}
+}
+function updateMockBanner(){
+  const isMock = $('provider').value === 'mock';
+  $('mockBanner').classList.toggle('hidden', !isMock);
+  const pill = document.querySelector('#provider-pill b');
+  if(pill) pill.textContent = $('provider').value;
+}
+async function loadUseCases(){
+  try{
+    const d = await (await fetch('/api/use-cases')).json();
+    $('useCase').innerHTML = d.use_cases.map(u =>
+      `<option value="${u.id}">${u.name}${u.identity_required?' (identity)':''}</option>`).join('');
+    const demo = [...$('useCase').options].find(o=>o.value==='housekeeping_demo_short');
+    if(demo) demo.selected = true;
+  }catch(e){}
+}
+
+// file selection
+const drop = $('drop');
+drop.addEventListener('click', ()=> $('file').click());
+$('file').addEventListener('change', e => setFile(e.target.files[0]));
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));
+drop.addEventListener('drop', e => { if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+function setFile(f){
+  if(!f) return;
+  selectedFile = f;
+  drop.classList.add('has-file');
+  drop.querySelector('b').textContent = '📹 ' + f.name;
+  $('analyzeBtn').disabled = false;
+}
+
+$('analyzeBtn').addEventListener('click', async ()=>{
+  if(!selectedFile) return;
+  const fd = new FormData();
+  fd.append('file', selectedFile);
+  fd.append('use_case', $('useCase').value);
+  fd.append('interval', $('interval').value);
+  fd.append('provider', $('provider').value);
+  await launch('/api/analyze', fd);
+});
+$('demoBtn').addEventListener('click', async ()=>{
+  const fd = new FormData();
+  fd.append('use_case', $('useCase').value);
+  fd.append('interval', $('interval').value);
+  fd.append('provider', $('provider').value);
+  await launch('/api/analyze-demo', fd);
+});
+$('provider').addEventListener('change', updateMockBanner);
+
+async function launch(url, fd){
+  resetUI();
+  $('analyzeBtn').disabled = true; $('demoBtn').disabled = true;
+  $('statusRow').classList.remove('hidden');
+  $('progressWrap').classList.remove('hidden');
+  try{
+    const r = await fetch(url, {method:'POST', body:fd});
+    if(!r.ok){ throw new Error((await r.json()).detail || r.statusText); }
+    const {job_id} = await r.json();
+    poll(job_id);
+  }catch(e){
+    $('statusText').textContent = '⚠ ' + e.message;
+    $('analyzeBtn').disabled = !selectedFile; $('demoBtn').disabled = false;
+  }
+}
+
+function resetUI(){
+  if(polling) clearInterval(polling);
+  seen = new Set();
+  $('frames').innerHTML=''; $('alerts').innerHTML='';
+  $('framesWrap').classList.add('hidden'); $('alertsWrap').classList.add('hidden');
+  $('verdictWrap').classList.add('hidden');
+  $('progressBar').style.width='0%';
+}
+
+function poll(jobId){
+  polling = setInterval(async ()=>{
+    let s;
+    try{ s = await (await fetch('/api/jobs/'+jobId)).json(); }catch(e){ return; }
+    render(s);
+    if(s.status==='done' || s.status==='error'){
+      clearInterval(polling);
+      $('analyzeBtn').disabled = !selectedFile; $('demoBtn').disabled = false;
+    }
+  }, 1200);
+}
+
+function render(s){
+  // status + progress
+  const pct = s.total ? Math.min(100, Math.round(100*s.processed/s.total)) : 0;
+  $('progressBar').style.width = (s.status==='done'?100:pct) + '%';
+  $('countText').textContent = `${s.processed}${s.total?'/'+s.total:''} frames`;
+  if(s.status==='running'){
+    $('statusText').innerHTML = `<span class="spinner"></span> Analyzing with <b>${s.provider}</b>…`;
+  }else if(s.status==='error'){
+    $('statusText').textContent = '⚠ ' + (s.error||'error');
+  }else if(s.status==='done'){
+    $('statusText').textContent = '✓ Done' + (s.note? ' — '+s.note : '');
+  }
+
+  // frames (append only new)
+  if(s.frames.length){ $('framesWrap').classList.remove('hidden'); }
+  for(const f of s.frames){
+    if(seen.has(f.frame_index)) continue;
+    seen.add(f.frame_index);
+    const beh = f.behaviors.length
+      ? f.behaviors.map(b=>`<span class="chip">${b}</span>`).join('')
+      : (f.parse_success ? '<span class="none">no activity detected</span>'
+                         : '<span class="none">VLM response unparsed</span>');
+    const el = document.createElement('div');
+    el.className='frame';
+    el.innerHTML = `
+      ${f.frame_url?`<img loading="lazy" src="${f.frame_url}" />`:''}
+      <div class="body">
+        <div class="fi"><span>Frame ${f.frame_index}</span><span>${f.latency_ms} ms</span></div>
+        <div class="bh">${beh}</div>
+        ${f.reasoning?`<div class="rz">${escapeHtml(f.reasoning)}</div>`:''}
+      </div>`;
+    $('frames').appendChild(el);
+  }
+
+  // alerts
+  if(s.alerts.length){
+    $('alertsWrap').classList.remove('hidden');
+    $('alerts').innerHTML = s.alerts.map(a=>`
+      <div class="alert ${a.severity}">
+        <div>
+          <div class="t">${a.trigger}</div>
+          <div class="m">${escapeHtml(a.message)} · frame ${a.frame_index ?? '—'}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  // verdict
+  if(s.verdict){
+    const v = s.verdict, ok = v.compliant;
+    $('verdictWrap').classList.remove('hidden');
+    const sess = v.session||{};
+    $('verdict').className = 'verdict ' + (ok?'ok':'bad');
+    $('verdict').innerHTML = `
+      <span class="pill">${ok?'COMPLIANT':'VIOLATION'}</span>
+      <div>
+        <div class="meta">${sess.duration_seconds??'?'}s · ${sess.frame_count??0} frames · behaviours seen: ${(sess.behaviors_seen||[]).join(', ')||'none'}</div>
+        ${(v.fired_triggers&&v.fired_triggers.length)?
+          `<div class="triggers">${v.fired_triggers.map(t=>`<span class="chip">${t}</span>`).join('')}</div>`:''}
+      </div>`;
+  }
+}
+
+function escapeHtml(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+loadHealth(); loadUseCases();
+</script>
+</body>
+</html>

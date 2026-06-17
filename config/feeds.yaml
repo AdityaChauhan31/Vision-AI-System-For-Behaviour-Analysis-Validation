@@ -1,0 +1,63 @@
+# ============================================================
+#  feeds.yaml  —  all video sources are declared here
+#  No code changes needed to add / remove a feed.
+# ============================================================
+
+feeds:
+
+  - id: hotel_room_101
+    name: "Room 101 — Housekeeping Camera"
+    source_type: rtsp                          # rtsp | file | webcam
+    source: "rtsp://admin:pass@192.168.1.10:554/stream1"
+    use_case: housekeeping_validation
+    sample_interval_seconds: 5                 # 1 frame every 5 s
+    enabled: false                             # disabled because no RTSP/CCTV connection available
+    output_dir: "frames/hotel_room_101"
+    reconnect_attempts: 5
+    reconnect_delay_seconds: 3
+    resize:
+      width: 1280
+      height: 720
+
+  - id: lobby_entrance
+    name: "Main Lobby — Loitering Detection"
+    source_type: rtsp
+    source: "rtsp://admin:pass@192.168.1.11:554/stream2"
+    use_case: loitering_detection
+    sample_interval_seconds: 2
+    enabled: false                             # disabled because no RTSP/CCTV connection available
+    output_dir: "frames/lobby_entrance"
+    reconnect_attempts: 5
+    reconnect_delay_seconds: 3
+    resize:
+      width: 1280
+      height: 720
+
+  - id: demo_housekeeping_video
+    name: "Demo — Housekeeping Folder"
+    source_type: file                          # local directory containing .mp4 demo files
+    source: "data/220638545-4k-timelapse-indian-girl-clean.mp4"
+    use_case: housekeeping_validation
+    sample_interval_seconds: 5
+    enabled: true
+    output_dir: "frames/demo_housekeeping"
+    reconnect_attempts: 1                      # no reconnect for files
+    reconnect_delay_seconds: 0
+    resize:
+      width: 1280
+      height: 720
+    loop: false                                 # replay file when it ends
+
+  - id: webcam_dev
+    name: "Developer Webcam"
+    source_type: webcam
+    source: 0                                  # device index (int)
+    use_case: loitering_detection
+    sample_interval_seconds: 3
+    enabled: false                             # toggle without deleting
+    output_dir: "frames/webcam_dev"
+    reconnect_attempts: 3
+    reconnect_delay_seconds: 2
+    resize:
+      width: 640
+      height: 480

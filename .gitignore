@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+frames/
+logs/
+data/*.mp4
+data/enrolled_faces/
+.venv/
+venv/
+.pytest_cache/

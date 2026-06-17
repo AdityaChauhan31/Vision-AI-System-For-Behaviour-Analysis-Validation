@@ -1,0 +1,157 @@
+# ============================================================
+#  use_cases.yaml — behavioral definitions loaded into VLM prompts
+#
+#  Adding a NEW use case = adding a block here. Zero code changes.
+# ============================================================
+
+use_cases:
+
+  # ── Use Case 1: Housekeeping Validation ────────────────────────────────────
+  - id: housekeeping_validation
+    name: "Housekeeping Work Validation"
+    description: >
+      A staff member enters a hotel room or corridor to clean it.
+      Validate that all required cleaning steps are performed in sequence
+      and that the visit duration is within the expected window.
+    identity_required: false         # anonymous mode — works on demo videos
+    behaviors_to_detect:
+      - mopping_floor
+      - wiping_surfaces
+      - changing_linen
+      - emptying_bins
+      - vacuuming
+      - cleaning_bathroom
+      - arranging_items
+      - idle_standing
+    behavior_definitions:
+      mopping_floor: "Person pushing or pulling a mop across the floor surface"
+      wiping_surfaces: "Person using a cloth or spray to clean tables, counters, or furniture"
+      changing_linen: "Person removing or placing bed sheets, pillowcases, or towels"
+      emptying_bins: "Person lifting and emptying a trash bin or waste basket"
+      vacuuming: "Person operating a vacuum cleaner on carpet or floor"
+      cleaning_bathroom: "Person cleaning sink, toilet, shower, or mirrors"
+      arranging_items: "Person straightening furniture, pillows, or room items"
+      idle_standing: "Person standing still without performing any cleaning activity"
+    required_behaviors: [mopping_floor, wiping_surfaces, changing_linen, emptying_bins]
+    optional_behaviors: [vacuuming, cleaning_bathroom, arranging_items]
+    rules:
+      min_duration_minutes: 10
+      max_duration_minutes: 60
+      all_required_steps_must_complete: true
+      alert_on_idle_minutes: 5
+      idle_behaviors: [idle_standing]
+    alert_triggers:
+      - missing_required_step
+      - visit_too_short
+      - visit_too_long
+      - extended_idle
+
+  # ── Use Case 2: Identity-Bound Restriction ─────────────────────────────────
+  - id: identity_restriction
+    name: "Identity-Bound Area Restriction"
+    description: >
+      A known person enters or is present in a monitored area.
+      Validate whether they are authorized to be in that zone.
+      Raise an alert if an unauthorized person enters a restricted zone.
+    identity_required: true
+    behaviors_to_detect:
+      - entering_zone
+      - exiting_zone
+      - present_in_zone
+      - attempting_access
+      - loitering_near_zone
+    behavior_definitions:
+      entering_zone: "Person moving from outside to inside the defined zone boundary"
+      exiting_zone: "Person moving from inside the zone to outside its boundary"
+      present_in_zone: "Person is stationary or moving within the zone"
+      attempting_access: "Person reaching toward a door, lock, or access panel"
+      loitering_near_zone: "Person standing near zone boundary without entering"
+    required_behaviors: []
+    rules:
+      unauthorized_entry_alert: true
+      max_presence_seconds_if_unauthorized: 0
+    alert_triggers:
+      - unauthorized_zone_entry
+      - unknown_person_in_restricted_zone
+
+  # ── Use Case 3: Loitering Detection ────────────────────────────────────────
+  - id: loitering_detection
+    name: "Loitering and Idle Presence Detection"
+    description: >
+      Monitor public or semi-public areas for persons standing idle
+      for longer than an acceptable duration. Raise an alert when
+      loitering is detected.
+    identity_required: false
+    behaviors_to_detect:
+      - walking_through
+      - standing_idle
+      - pacing
+      - sitting
+      - using_phone
+      - looking_around_suspiciously
+    behavior_definitions:
+      walking_through: "Person moving with purpose through the area without stopping"
+      standing_idle: "Person standing still in one location without obvious purpose"
+      pacing: "Person walking back and forth repeatedly in a small area"
+      sitting: "Person seated on floor, ledge, or furniture not intended for sitting"
+      using_phone: "Person looking at or talking on a mobile phone while stationary"
+      looking_around_suspiciously: "Person repeatedly scanning the area in multiple directions"
+    required_behaviors: []
+    rules:
+      max_idle_duration_seconds: 120
+      alert_on_pacing: true
+      idle_behaviors: [standing_idle, sitting, using_phone]
+      suspicious_behaviors: [looking_around_suspiciously]
+    alert_triggers:
+      - loitering_threshold_exceeded
+      - suspicious_behavior_detected
+
+  # ── Use Case 4: Housekeeping (short-clip demo) ─────────────────────────────
+  #  Identical behaviours to use case 1 but with SECOND-scale thresholds so a
+  #  10-20s demo clip can pass as "compliant". Demonstrates that a new use case
+  #  is pure configuration — no code changes.
+  - id: housekeeping_demo_short
+    name: "Housekeeping Validation (Short Demo Clip)"
+    description: >
+      Same cleaning validation as housekeeping_validation, retuned for short
+      downloaded demo clips where a full 10-60 minute visit isn't available.
+    identity_required: True
+    behaviors_to_detect:
+      - mopping_floor
+      - wiping_surfaces
+      - changing_linen
+      - emptying_bins
+      - vacuuming
+      - cleaning_bathroom
+      - arranging_items
+      - idle_standing
+    behavior_definitions:
+      mopping_floor: "Person pushing or pulling a mop across the floor surface"
+      wiping_surfaces: "Person using a cloth or spray to clean tables, counters, or furniture"
+      changing_linen: "Person removing or placing bed sheets, pillowcases, or towels"
+      emptying_bins: "Person lifting and emptying a trash bin or waste basket"
+      vacuuming: "Person operating a vacuum cleaner on carpet or floor"
+      cleaning_bathroom: "Person cleaning sink, toilet, shower, or mirrors"
+      arranging_items: "Person straightening furniture, pillows, or room items"
+      idle_standing: "Person standing still without performing any cleaning activity"
+    required_behaviors: [mopping_floor, wiping_surfaces]
+    optional_behaviors: [vacuuming, cleaning_bathroom, arranging_items, changing_linen, emptying_bins]
+    rules:
+      min_duration_seconds: 5
+      max_duration_seconds: 600
+      all_required_steps_must_complete: true
+      alert_on_idle_seconds: 30
+      idle_behaviors: [idle_standing]
+    alert_triggers:
+      - missing_required_step
+      - visit_too_short
+      - visit_too_long
+      - extended_idle
+
+  # ── VLM prompt settings (shared across all use cases) ──────────────────────
+vlm_settings:
+  max_behaviors_in_prompt: 8        # don't overwhelm the model
+  include_behavior_definitions: true
+  include_previous_context: true
+  max_context_frames: 5             # summarize last N frames in prompt
+  response_format: json

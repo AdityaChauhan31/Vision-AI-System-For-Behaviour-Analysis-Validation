@@ -1,0 +1,66 @@
+# ============================================================
+#  zones.yaml — polygon definitions per feed
+#
+#  HOW TO GET COORDINATES FOR DEMO VIDEOS:
+#  Run:  python tools/define_zones.py --video data/your_video.mp4
+#  Click corners of the zone on the first frame.
+#  Coordinates are printed and can be pasted here.
+#
+#  For housekeeping demo videos with no specific zones,
+#  use mode: full_frame — this treats the entire frame as one zone.
+# ============================================================
+
+zones:
+
+  # ── Demo housekeeping video (downloaded from internet) ─────────────────────
+  - id: room_full_frame
+    name: "Entire Room (Demo)"
+    feed_id: demo_housekeeping_video
+    mode: full_frame              # whole frame = one zone (no polygon needed)
+    label: room_A
+
+  # ── When you have real polygon coordinates (from define_zones.py tool) ─────
+  - id: restricted_corridor
+    name: "Restricted Corridor Area"
+    feed_id: lobby_entrance
+    mode: polygon
+    polygon:                      # [x, y] pixel coordinates, clockwise
+      - [120, 80]
+      - [560, 80]
+      - [560, 400]
+      - [120, 400]
+    label: restricted_area
+
+  - id: work_zone_bathroom
+    name: "Bathroom Work Zone"
+    feed_id: hotel_room_101
+    mode: polygon
+    polygon:
+      - [600, 50]
+      - [1200, 50]
+      - [1200, 680]
+      - [600, 680]
+    label: bathroom
+
+  - id: work_zone_main_room
+    name: "Main Room Work Zone"
+    feed_id: hotel_room_101
+    mode: polygon
+    polygon:
+      - [0, 0]
+      - [600, 0]
+      - [600, 720]
+      - [0, 720]
+    label: main_room
+
+  # ── Your self-recorded identity test video ─────────────────────────────────
+  - id: doorway_restricted
+    name: "Restricted Doorway"
+    feed_id: webcam_dev
+    mode: polygon
+    polygon:
+      - [200, 0]
+      - [440, 0]
+      - [440, 480]
+      - [200, 480]
+    label: restricted_entry

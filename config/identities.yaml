@@ -1,0 +1,59 @@
+# ============================================================
+#  identities.yaml — enrolled persons for identity-bound rules
+#
+#  HOW TO ENROLL A PERSON:
+#  Run: python tools/enroll_face.py --name "John Doe" --source data/john_video.mp4
+#  OR:  python tools/enroll_face.py --name "John Doe" --source data/john_photo.jpg
+#
+#  The tool extracts face embeddings and updates this file automatically.
+#
+#  FOR DEMO HOUSEKEEPING VIDEOS:
+#  You don't need any entries here. The system runs in anonymous mode.
+#  Face recognition is only needed for the identity-bound use case.
+# ============================================================
+
+persons:
+  - id: staff_001
+    name: "NANCY"
+    role: staff
+    embedding_path: "data/enrolled_faces/staff_001.npy"
+    allowed_zones: [room_A]       # fill in zone labels
+    restricted_zones: []    # fill in restricted zone labels
+    use_cases: [housekeeping_validation, identity_restriction]
+    active: true
+
+  # ── Example enrolled person (your self-recorded video) ─────────────────────
+  - id: staff_member_01
+    name: "Demo Staff Member A"
+    role: housekeeping_staff
+    embedding_path: "data/enrolled_faces/staff_member_01.npy"
+    allowed_zones: [room_A, bathroom, main_room]
+    restricted_zones: [manager_office]
+    use_cases: [housekeeping_validation]
+    active: true
+
+  - id: staff_member_02
+    name: "Demo Staff Member B"
+    role: housekeeping_staff
+    embedding_path: "data/enrolled_faces/staff_member_02.npy"
+    allowed_zones: [room_A, bathroom, main_room]
+    restricted_zones: [manager_office, restricted_corridor]
+    use_cases: [housekeeping_validation, identity_restriction]
+    active: true
+
+  - id: manager_01
+    name: "Demo Manager"
+    role: manager
+    embedding_path: "data/enrolled_faces/manager_01.npy"
+    allowed_zones: [room_A, bathroom, main_room, manager_office, restricted_corridor]
+    restricted_zones: []
+    use_cases: [identity_restriction]
+    active: true
+
+# ── Recognition settings ────────────────────────────────────────────────────
+settings:
+  similarity_threshold: 0.2    # cosine similarity; below this = "unknown"
+  model: VGG-Face                # DeepFace model: VGG-Face | Facenet | ArcFace
+  detector: opencv               # face detector: opencv | retinaface | mtcnn
+  enforce_detection: false       # false = don't crash if no face found in frame
+  anonymous_label: "unknown"     # label used when person not recognized
